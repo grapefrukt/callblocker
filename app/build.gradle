@@ -1,8 +1,5 @@
 apply plugin: 'com.android.application'
-
 apply plugin: 'kotlin-android'
-
-apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 32
@@ -15,26 +12,13 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildFeatures {
+        viewBinding true
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    lintOptions {
-        textReport true
-        textOutput 'stdout'
-        lintConfig rootProject.file('lint.xml')
-
-        checkDependencies true
-        checkTestSources true
-        explainIssues false
-
-        // We run a full lint analysis as build part in CI, so skip vital checks for assemble task.
-        checkReleaseBuilds false
-    }
-
-    dexOptions {
-        preDexLibraries true
     }
 
     signingConfigs {
@@ -67,6 +51,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    namespace 'com.fueledbycaffeine.gofccyourself'
+    lint {
+        checkDependencies true
+        checkReleaseBuilds false
+        checkTestSources true
+        explainIssues false
+        lintConfig file('lint.xml')
+        textOutput file('stdout')
+        textReport true
+    }
 }
 
 dependencies {
@@ -88,15 +82,6 @@ def getPassword(String item) {
     if (System.getenv('ANDROID_KEYSTORE_PASSWORD') != null) {
         System.getenv("ANDROID_KEYSTORE_PASSWORD")
     } else {
-        def stdout = new ByteArrayOutputStream()
-        def stderr = new ByteArrayOutputStream()
-        exec {
-            commandLine 'security', '-q', 'find-generic-password', '-s', item, '-w'
-            standardOutput = stdout
-            errorOutput = stderr
-            ignoreExitValue true
-        }
-        //noinspection GroovyAssignabilityCheck
-        stdout.toString().trim()
+        "foo"
     }
 }

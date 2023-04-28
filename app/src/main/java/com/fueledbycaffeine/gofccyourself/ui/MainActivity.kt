@@ -15,7 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.fueledbycaffeine.gofccyourself.R
 import com.fueledbycaffeine.gofccyourself.ScreeningPreferences
-import kotlinx.android.synthetic.main.activity_main.*
+import com.fueledbycaffeine.gofccyourself.databinding.ActivityMainBinding
 import pub.devrel.easypermissions.EasyPermissions
 import timber.log.Timber
 
@@ -36,8 +36,11 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     get() = EasyPermissions.hasPermissions(this, Manifest.permission.READ_CONTACTS)
   private var contactsAccessDeniedForever = false
 
+
+  private lateinit var binding: ActivityMainBinding
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    binding = ActivityMainBinding.inflate(layoutInflater)
     setContentView(R.layout.activity_main)
 
     contactsAccessDeniedForever = savedInstanceState
@@ -118,29 +121,29 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
   }
 
   private fun addUiListeners() {
-    activateButton.setOnClickListener { requestContactsPermission() }
+    binding.activateButton.setOnClickListener { requestContactsPermission() }
 
-    enableSwitch.setOnCheckedChangeListener { _, enabled ->
+    binding.enableSwitch.setOnCheckedChangeListener { _, enabled ->
       prefs.isServiceEnabled = enabled
       updateUi()
     }
-    skipNotificationSwitch.setOnCheckedChangeListener { _, skip ->
+    binding.skipNotificationSwitch.setOnCheckedChangeListener { _, skip ->
       prefs.skipCallNotification = skip
       updateUi()
     }
-    skipCallLogSwitch.setOnCheckedChangeListener { _, skip ->
+    binding.skipCallLogSwitch.setOnCheckedChangeListener { _, skip ->
       prefs.skipCallLog = skip
       updateUi()
     }
-    declineUnknownCallers.setOnCheckedChangeListener { _, skip ->
+    binding.declineUnknownCallers.setOnCheckedChangeListener { _, skip ->
       prefs.declineUnknownCallers = skip
       updateUi()
     }
-    declineAuthenticationFailures.setOnCheckedChangeListener { _, skip ->
+    binding.declineAuthenticationFailures.setOnCheckedChangeListener { _, skip ->
       prefs.declineAuthenticationFailures = skip
       updateUi()
     }
-    declineUnauthenticatedCallers.setOnCheckedChangeListener { _, skip ->
+    binding.declineUnauthenticatedCallers.setOnCheckedChangeListener { _, skip ->
       prefs.declineUnauthenticatedCallers = skip
       updateUi()
     }
@@ -148,44 +151,44 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
   private fun updateUi() {
     val isInstalled = readContactsPermissionGranted && hasCallScreeningRole
-    statusLabel.text = when (isInstalled) {
+    binding.statusLabel.text = when (isInstalled) {
       true -> getString(R.string.status_activated)
       else -> getString(R.string.status_inactive)
     }
-    activateButton.isVisible = isInstalled.not()
-    enableSwitch.isVisible = isInstalled
-    skipNotificationSwitch.isVisible = isInstalled
-    skipCallLogSwitch.isVisible = isInstalled
-    declineUnknownCallers.isVisible = isInstalled
-    declineAuthenticationFailures.isVisible = isInstalled
-    declineUnauthenticatedCallers.isVisible = isInstalled
+    binding.activateButton.isVisible = isInstalled.not()
+    binding.enableSwitch.isVisible = isInstalled
+    binding.skipNotificationSwitch.isVisible = isInstalled
+    binding.skipCallLogSwitch.isVisible = isInstalled
+    binding.declineUnknownCallers.isVisible = isInstalled
+    binding.declineAuthenticationFailures.isVisible = isInstalled
+    binding.declineUnauthenticatedCallers.isVisible = isInstalled
 
-    enableSwitch.isChecked = prefs.isServiceEnabled
+    binding.enableSwitch.isChecked = prefs.isServiceEnabled
 
     if (Build.VERSION.SDK_INT > 100) {
-      skipNotificationSwitch.isEnabled = prefs.isServiceEnabled
-      skipNotificationSwitch.isChecked = prefs.skipCallNotification
+      binding.skipNotificationSwitch.isEnabled = prefs.isServiceEnabled
+      binding.skipNotificationSwitch.isChecked = prefs.skipCallNotification
 
-      skipCallLogSwitch.isEnabled = prefs.isServiceEnabled
-      skipCallLogSwitch.isChecked = prefs.skipCallLog
+      binding.skipCallLogSwitch.isEnabled = prefs.isServiceEnabled
+      binding.skipCallLogSwitch.isChecked = prefs.skipCallLog
     } else {
-      skipNotificationSwitch.isEnabled = false
-      skipNotificationSwitch.isChecked = true
-      skipNotificationDescription.visibility = View.VISIBLE
+      binding.skipNotificationSwitch.isEnabled = false
+      binding.skipNotificationSwitch.isChecked = true
+      binding.skipNotificationDescription.visibility = View.VISIBLE
 
-      skipCallLogSwitch.isEnabled = false
-      skipCallLogSwitch.isChecked = true
-      skipCallLogDescription.visibility = View.VISIBLE
+      binding.skipCallLogSwitch.isEnabled = false
+      binding.skipCallLogSwitch.isChecked = true
+      binding.skipCallLogDescription.visibility = View.VISIBLE
     }
 
 
-    declineUnknownCallers.isEnabled = prefs.isServiceEnabled
-    declineUnknownCallers.isChecked = prefs.declineUnknownCallers
+    binding.declineUnknownCallers.isEnabled = prefs.isServiceEnabled
+    binding.declineUnknownCallers.isChecked = prefs.declineUnknownCallers
 
-    declineAuthenticationFailures.isEnabled = prefs.isServiceEnabled
-    declineAuthenticationFailures.isChecked = prefs.declineAuthenticationFailures
+    binding.declineAuthenticationFailures.isEnabled = prefs.isServiceEnabled
+    binding.declineAuthenticationFailures.isChecked = prefs.declineAuthenticationFailures
 
-    declineUnauthenticatedCallers.isEnabled = prefs.isServiceEnabled
-    declineUnauthenticatedCallers.isChecked = prefs.declineUnauthenticatedCallers
+    binding.declineUnauthenticatedCallers.isEnabled = prefs.isServiceEnabled
+    binding.declineUnauthenticatedCallers.isChecked = prefs.declineUnauthenticatedCallers
   }
 }
