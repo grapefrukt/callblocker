@@ -40,11 +40,12 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
   private lateinit var binding: ActivityMainBinding
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    binding = ActivityMainBinding.inflate(layoutInflater)
-    setContentView(R.layout.activity_main)
 
     contactsAccessDeniedForever = savedInstanceState
       ?.getBoolean(EXTRA_CONTACT_READ_PERMISSION_DENIED, false) ?: false
+
+    binding = ActivityMainBinding.inflate(layoutInflater)
+    setContentView(binding.root)
 
     addUiListeners()
     updateUi()
