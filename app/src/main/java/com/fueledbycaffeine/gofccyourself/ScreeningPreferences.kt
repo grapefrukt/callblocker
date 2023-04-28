@@ -11,6 +11,7 @@ class ScreeningPreferences(context: Context) {
     private const val PREF_DECLINE_UNKNOWN_CALLERS = "decline_unknown_callers"
     private const val PREF_DECLINE_UNAUTHENTICATED_CALLERS = "decline_unauthenticated_callers"
     private const val PREF_DECLINE_AUTH_FAILURES = "decline_auth_failures"
+    private const val PREF_WHITELIST_PREFIX = "decline_starts_with"
   }
 
   private val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
@@ -39,6 +40,7 @@ class ScreeningPreferences(context: Context) {
     get() = sharedPrefs.getBoolean(PREF_SKIP_CALL_LOG, false)
     set(value) = sharedPrefs.edit().putBoolean(PREF_SKIP_CALL_LOG, value).apply()
 
+
   /**
    * Should the app decline callers who are not found in the user's contacts?
    * Defaults to false
@@ -62,4 +64,12 @@ class ScreeningPreferences(context: Context) {
   var declineAuthenticationFailures: Boolean
     get() = sharedPrefs.getBoolean(PREF_DECLINE_AUTH_FAILURES, true)
     set(value) = sharedPrefs.edit().putBoolean(PREF_DECLINE_AUTH_FAILURES, value).apply()
+
+  /**
+   * Decline unknown callers if their caller ID does not start with this string
+   * Defaults to +46
+   */
+  var whitelistPrefix: String
+    get() = sharedPrefs.getString(PREF_WHITELIST_PREFIX, "+46").toString()
+    set(value) = sharedPrefs.edit().putString(PREF_WHITELIST_PREFIX, value).apply()
 }

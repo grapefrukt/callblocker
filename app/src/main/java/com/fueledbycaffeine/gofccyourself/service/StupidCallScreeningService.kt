@@ -26,41 +26,47 @@ class StupidCallScreeningService : CallScreeningService() {
    * https://issuetracker.google.com/issues/130081372
    */
   override fun onScreenCall(details: Call.Details) {
-    if (details.callDirection == Call.Details.DIRECTION_INCOMING) {
-      // https://www.fcc.gov/call-authentication
-      when (details.callerNumberVerificationStatus) {
-        Connection.VERIFICATION_STATUS_NOT_VERIFIED -> log.w("No caller verification was performed for ${details.formattedPhoneNumber}!")
-        Connection.VERIFICATION_STATUS_FAILED -> log.e("Caller ${details.formattedPhoneNumber} FAILED verification!")
-        Connection.VERIFICATION_STATUS_PASSED -> log.i("Caller ${details.formattedPhoneNumber} is verified...")
-      }
-
-      // Always called, even for known contacts (when holding READ_CONTACTS permission, to allow
-      // screening spoofed numbers)
-      // https://issuetracker.google.com/issues/141363242
-      //
-      // Call.Details includes caller name info as of R preview 2, but this seems to always be null
-      // because the screening service is called before the lookup completes
-      // https://issuetracker.google.com/issues/151898484
-      //
-      // Handle may be null if caller id is blocked.
-      val caller = details.handle?.let { getContactName(it.schemeSpecificPart) }
-
-      val rejectDueToVerificationStatus = when (details.callerNumberVerificationStatus) {
-        Connection.VERIFICATION_STATUS_FAILED -> prefs.declineAuthenticationFailures
-        Connection.VERIFICATION_STATUS_NOT_VERIFIED -> prefs.declineUnauthenticatedCallers
-        else -> false
-      }
-
-      val rejectDueToUnknownCaller = caller == null && prefs.declineUnknownCallers
-
-      val response = if (rejectDueToVerificationStatus || rejectDueToUnknownCaller) {
-        buildRejectionResponse()
-      } else {
-        buildAcceptResponse()
-      }
-
-      respondToCall(details, response)
+    if (details.callDirection != Call.Details.DIRECTION_INCOMING) return
+    // https://www.fcc.gov/call-authentication
+    when (details.callerNumberVerificationStatus) {
+      Connection.VERIFICATION_STATUS_NOT_VERIFIED -> log.w("No caller verification was performed for ${details.normalizedPhoneNumber}!")
+      Connection.VERIFICATION_STATUS_FAILED -> log.e("Caller ${details.normalizedPhoneNumber} FAILED verification!")
+      Connection.VERIFICATION_STATUS_PASSED -> log.i("Caller ${details.normalizedPhoneNumber} is verified...")
     }
+
+    // Always called, even for known contacts (when holding READ_CONTACTS permission, to allow
+    // screening spoofed numbers)
+    // https://issuetracker.google.com/issues/141363242
+    //
+    // Call.Details includes caller name info as of R preview 2, but this seems to always be null
+    // because the screening service is called before the lookup completes
+    // https://issuetracker.google.com/issues/151898484
+    //
+    // Handle may be null if caller id is blocked.
+    val caller = details.handle?.let { getContactName(it.schemeSpecificPart) }
+
+    val rejectDueToVerificationStatus = when (details.callerNumberVerificationStatus) {
+      Connection.VERIFICATION_STATUS_FAILED -> prefs.declineAuthenticationFailures
+      Connection.VERIFICATION_STATUS_NOT_VERIFIED -> prefs.declineUnauthenticatedCallers
+      else -> false
+    }
+
+    val rejectDueToUnknownCaller = caller == null && prefs.declineUnknownCallers
+
+    var reject = rejectDueToVerificationStatus || rejectDueToUnknownCaller
+
+    // "unreject" anything that starts with the whitelist string, if it's set
+    if (reject and details.normalizedPhoneNumber.isNotBlank() and prefs.whitelistPrefix.isNotBlank() and details.normalizedPhoneNumber.startsWith(prefs.whitelistPrefix)){
+      reject = false
+    }
+
+    val response = if (reject) {
+      buildRejectionResponse()
+    } else {
+      buildAcceptResponse()
+    }
+
+    respondToCall(details, response)
   }
 
   private fun buildAcceptResponse(): CallResponse {
@@ -103,5 +109,12 @@ private val Call.Details.formattedPhoneNumber: String get() {
       phoneNumber,
       Locale.getDefault().country
     )
+  }
+}
+
+private val Call.Details.normalizedPhoneNumber: String get() {
+  return when (val phoneNumber = handle?.schemeSpecificPart) {
+    null -> "BLOCKED"
+    else -> PhoneNumberUtils.normalizeNumber(phoneNumber)
   }
 }
