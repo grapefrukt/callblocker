@@ -9,6 +9,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -148,6 +150,18 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
       prefs.declineUnauthenticatedCallers = skip
       updateUi()
     }
+
+    binding.whitelistPrefix.addTextChangedListener(object : TextWatcher {
+      override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+      override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+      override fun afterTextChanged(p0: Editable?) {
+        // gotta compare the new value to the old here, if they're the same we can bail
+        // (if we don't, we'll recurse forever)
+        if (prefs.whitelistPrefix == binding.whitelistPrefix.text.toString()) return
+        prefs.whitelistPrefix = binding.whitelistPrefix.text.toString()
+        updateUi()
+      }
+    })
   }
 
   private fun updateUi() {
@@ -182,12 +196,14 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
       binding.skipCallLogDescription.visibility = View.VISIBLE
     }
 
-
     binding.declineUnknownCallers.isEnabled = prefs.isServiceEnabled
     binding.declineUnknownCallers.isChecked = prefs.declineUnknownCallers
 
     binding.declineAuthenticationFailures.isEnabled = prefs.isServiceEnabled
     binding.declineAuthenticationFailures.isChecked = prefs.declineAuthenticationFailures
+
+    binding.whitelistPrefix.isEnabled = prefs.isServiceEnabled
+    binding.whitelistPrefix.setText(prefs.whitelistPrefix)
 
     binding.declineUnauthenticatedCallers.isEnabled = prefs.isServiceEnabled
     binding.declineUnauthenticatedCallers.isChecked = prefs.declineUnauthenticatedCallers

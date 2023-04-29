@@ -17,4 +17,6 @@
     <string name="pref_failed_auth_check_explanation">When enabled, this option declines callers which fail carrier verification. Callers that fail this check have a high likelihood of originating from a faked source.</string>
     <string name="pref_decline_unknown_callers">Decline unknown callers</string>
     <string name="pref_decline_unknown_callers_explanation">Decline calls from anyone not listed in your contacts. This includes calls where caller ID is blocked or unavailable for some reason.</string>
+    <string name="whitelist">Whitelist prefix</string>
+    <string name="pref_whitelist_explanation">Any incoming call that matches this whitelist prefix will be accepted, regardless of other rules</string>
 </resources>
