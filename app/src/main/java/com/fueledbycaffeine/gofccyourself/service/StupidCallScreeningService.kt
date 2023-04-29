@@ -58,6 +58,7 @@ class StupidCallScreeningService : CallScreeningService() {
     // "unreject" anything that starts with the whitelist string, if it's set
     if (reject and details.normalizedPhoneNumber.isNotBlank() and prefs.whitelistPrefix.isNotBlank() and details.normalizedPhoneNumber.startsWith(prefs.whitelistPrefix)){
       reject = false
+      log.i("Caller ${details.normalizedPhoneNumber} matched whitelist...")
     }
 
     val response = if (reject) {
